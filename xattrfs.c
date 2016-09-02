@@ -79,7 +79,7 @@ static int xattrfs_parse_opt(void *data, const char *arg, int key,
     }
     return 1;
 }
-#include "xattrdb.h"
+
 int main(int argc, char *argv[]) {
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
     int res;

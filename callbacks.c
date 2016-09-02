@@ -9,13 +9,12 @@
 #include "callbacks.h"
 #include "xattrdb.h"
 
-#define ERROR 1
 #define MAX_PATH 4096
-#define XATTRDB_FILE_NAME ".xattrdb"
+#define XATTRDB_FILE_NAME "/.xattrdb"
 char *source_dir = NULL;
 
 static void destination_path(char* dpath, const char *path) {
-    snprintf(dpath, MAX_PATH, "%s/%s", source_dir, path);
+    snprintf(dpath, MAX_PATH, "%s%s", source_dir, path);
 }
 
 static int check_res(const int res) {
@@ -182,23 +181,29 @@ int fsync_cb(const char *path, int isdatasync, struct fuse_file_info *fi) {
 }
 
 int setxattr_cb(const char *path, const char *name, const char *value, size_t size, int flags) {
-    return xattrdb_set(path, name, value, size) ? 0 : -ERROR;
+    return xattrdb_set(path, name, value, size) ? 0 : -EIO;
 }
 
 int getxattr_cb(const char *path, const char *name, char *value, size_t size) {
     unsigned int c;
     bool res = xattrdb_get(path, name, &c, value, size);
-    return res ? c : -ERROR;
+    if(res && c == 0) {
+        return -ENODATA;
+    }
+    return res ? c : -EIO;
 }
 
 int listxattr_cb(const char *path, char *list, size_t size) {
     unsigned int c;
     bool res = xattrdb_list(path, &c, list, size);
-    return res ? c : -ERROR;
+    if(res && c == 0) {
+        return -ENODATA;
+    }
+    return res ? c : -EIO;
 }
 
 int removexattr_cb(const char *path, const char *name) {
-    return xattrdb_removename(path, name) ? 0 : -ERROR;
+    return xattrdb_removename(path, name) ? 0 : -EIO;
 }
 
 int opendir_cb (const char *path, struct fuse_file_info *fi) {

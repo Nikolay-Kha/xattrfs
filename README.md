@@ -1,16 +1,13 @@
-**xattrfs**
-
+# xattrfs
 The purpose of this project is to emulate extended file attributes (aka xattr) for filesystems which don't support it. Project uses FUSE to create a bind of directory in some different mountpoint. New mountpoint allows to work with xattr regardless of capability of directory file system. Attributes will be stored in SQLite database in file `.xattrbd`.
 
-**Building**
-
+# Building
 ```bash
 sudo apt-get install libfuse-dev libsqlite3-dev
 make
 ```
 
-**Usage**
-
+# Usage
 ```bash
 xattrfs source_dir mountpoint [-o FUSE arguments]
 ```
@@ -19,8 +16,7 @@ See list of FUSE arguments in general mount options section of `man mount.fuse`.
 xattrfs /src /dest -o allow_other
 ```
 
-***Demo***
-
+# Demo
 This demo shows output on attemp to set up xattr on file system without xattr support - aufs. Then mount to another directory with xattrfs and it's possible to set up xattr. Last lines show where xattr actually stored. 
 ```bash
  ~ $ cd /tmp
@@ -42,3 +38,9 @@ user.demo.xattr="this value will be stored in sqlite"
 user.demo.xattr|this value will be stored in sqlite
  /tmp $
 ```
+
+# License
+The MIT License. See LICENSE file.
+
+# Authors
+Nikolay Khabarov
