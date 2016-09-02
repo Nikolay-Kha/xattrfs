@@ -45,7 +45,9 @@ struct fuse_operations callback_operations = {
     .opendir = opendir_cb,
     .readdir = readdir_cb,
     .releasedir = releasedir_cb,
-    .access = access_cb
+    .access = access_cb,
+    .init = init_cb,
+    .destroy = destroy_cb
 };
 
 static int xattrfs_parse_opt(void *data, const char *arg, int key,
@@ -77,7 +79,7 @@ static int xattrfs_parse_opt(void *data, const char *arg, int key,
     }
     return 1;
 }
-
+#include "xattrdb.h"
 int main(int argc, char *argv[]) {
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
     int res;

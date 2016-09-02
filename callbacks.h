@@ -40,5 +40,7 @@ int opendir_cb(const char *, struct fuse_file_info *);
 int readdir_cb(const char *, void *, fuse_fill_dir_t ,off_t, struct fuse_file_info *);
 int releasedir_cb(const char *, struct fuse_file_info *);
 int access_cb(const char *, int);
+void *init_cb(struct fuse_conn_info *);
+void destroy_cb(void *);
 
 #endif /* CALLBACKS_H_ */

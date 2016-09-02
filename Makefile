@@ -1,8 +1,8 @@
 CC          = gcc
 CFLAGS      = -O2 -c -Wall -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=26
-LDFLAGS     = -lfuse
+LDFLAGS     = -lfuse -lsqlite3
 OBJDIR      = build
-SOURCES     = xattrfs.c callbacks.c
+SOURCES     = xattrfs.c callbacks.c xattrdb.c
 OBJECTS     = $(addprefix $(OBJDIR)/, $(SOURCES:%.c=%.o))
 EXECUTABLE  = xattrfs
 

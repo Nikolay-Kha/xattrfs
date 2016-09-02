@@ -7,9 +7,11 @@
 #include <sys/statvfs.h>
 
 #include "callbacks.h"
+#include "xattrdb.h"
 
 #define ERROR 1
 #define MAX_PATH 4096
+#define XATTRDB_FILE_NAME ".xattrdb"
 char *source_dir = NULL;
 
 static void destination_path(char* dpath, const char *path) {
@@ -58,6 +60,9 @@ int unlink_cb(const char *path) {
     char dpath[MAX_PATH];
     destination_path(dpath, path);
     const int res = unlink(dpath);
+    if(res != - 1) {
+        xattrdb_removepath(path);
+    }
     return check_res(res);
 }
 
@@ -65,6 +70,7 @@ int rmdir_cb(const char *path) {
     char dpath[MAX_PATH];
     destination_path(dpath, path);
     const int res = rmdir(dpath);
+    // TODO cleanup database
     return check_res(res);
 }
 
@@ -83,6 +89,9 @@ int rename_cb(const char *oldpath, const char *newpath) {
     char dnewpath[MAX_PATH];
     destination_path(dnewpath, newpath);
     const int res = rename(doldpath, dnewpath);
+    if(res != -1) {
+        xattrdb_renamepath(oldpath, newpath);
+    }
     return check_res(res);
 }
 
@@ -173,19 +182,23 @@ int fsync_cb(const char *path, int isdatasync, struct fuse_file_info *fi) {
 }
 
 int setxattr_cb(const char *path, const char *name, const char *value, size_t size, int flags) {
-    return -ERROR;
+    return xattrdb_set(path, name, value, size) ? 0 : -ERROR;
 }
 
 int getxattr_cb(const char *path, const char *name, char *value, size_t size) {
-    return -ERROR;
+    unsigned int c;
+    bool res = xattrdb_get(path, name, &c, value, size);
+    return res ? c : -ERROR;
 }
 
 int listxattr_cb(const char *path, char *list, size_t size) {
-    return -ERROR;
+    unsigned int c;
+    bool res = xattrdb_list(path, &c, list, size);
+    return res ? c : -ERROR;
 }
 
 int removexattr_cb(const char *path, const char *name) {
-    return -ERROR;
+    return xattrdb_removename(path, name) ? 0 : -ERROR;
 }
 
 int opendir_cb (const char *path, struct fuse_file_info *fi) {
@@ -223,5 +236,16 @@ int access_cb(const char *path, int mode) {
     destination_path(dpath, path);
     const int res = access(dpath, mode);
     return check_res(res);
+}
+
+void *init_cb(struct fuse_conn_info *conn) {
+    char dpath[MAX_PATH];
+    destination_path(dpath, XATTRDB_FILE_NAME);
+    xattrdb_open(dpath);
+    return NULL;
+}
+
+void destroy_cb(void *data) {
+    xattrdb_close();
 }
 
