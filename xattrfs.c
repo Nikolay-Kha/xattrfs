@@ -95,6 +95,9 @@ int main(int argc, char *argv[]) {
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
     int res;
 
+    // do not limit our permission bits
+    umask(0);
+
     res = fuse_opt_parse(&args, &source_dir, xattrfs_opts, xattrfs_parse_opt);
     if(res != 0) {
         fprintf(stderr, "Invalid arguments\n");
