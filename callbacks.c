@@ -11,7 +11,8 @@
 
 #define MAX_PATH 4096
 #define XATTRDB_FILE_NAME "/.xattrdb"
-char *source_dir = NULL;
+char source_dir_storage[MAX_PATH] = "";
+char *source_dir = source_dir_storage;
 
 static void destination_path(char* dpath, const char *path) {
     snprintf(dpath, MAX_PATH, "%s%s", source_dir, path);
