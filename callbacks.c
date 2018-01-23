@@ -114,7 +114,7 @@ int chmod_cb(const char *path, mode_t mode) {
 int chown_cb(const char *path, uid_t owner, gid_t group) {
     char dpath[MAX_PATH];
     destination_path(dpath, path);
-    const int res = chown(dpath, owner, group);
+    const int res = lchown(dpath, owner, group);
     return check_res(res);
 }
 
