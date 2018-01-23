@@ -5,6 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/statvfs.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include "callbacks.h"
 #include "xattrdb.h"
@@ -125,10 +127,10 @@ int truncate_cb(const char *path, off_t size) {
     return check_res(res);
 }
 
-int utime_cb(const char *path, struct utimbuf *buf) {
+int utimens_cb(const char *path, const struct timespec tv[2]) {
     char dpath[MAX_PATH];
     destination_path(dpath, path);
-    const int res = utime(dpath, buf);
+    const int res = utimensat(0 /*ignored*/, dpath, tv, AT_SYMLINK_NOFOLLOW);
     return check_res(res);
 }
 
