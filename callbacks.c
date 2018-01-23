@@ -77,11 +77,9 @@ int rmdir_cb(const char *path) {
 }
 
 int symlink_cb(const char *target, const char *linkpath) {
-    char dtarget[MAX_PATH];
-    destination_path(dtarget, target);
     char dlinkpath[MAX_PATH];
     destination_path(dlinkpath, linkpath);
-    const int res = symlink(dtarget, dlinkpath);
+    const int res = symlink(target, dlinkpath);
     return check_res(res);
 }
 
