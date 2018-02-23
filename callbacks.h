@@ -9,6 +9,7 @@
 #define CALLBACKS_H_
 
 #include <fuse.h>
+#include <sys/stat.h>
 
 extern char *source_dir;
 
@@ -24,7 +25,7 @@ int link_cb(const char *, const char *);
 int chmod_cb(const char *, mode_t);
 int chown_cb(const char *, uid_t, gid_t);
 int truncate_cb(const char *, off_t);
-int utime_cb(const char *, struct utimbuf *);
+int utimens_cb(const char *path, const struct timespec tv[2]);
 int open_cb(const char *, struct fuse_file_info *);
 int read_cb(const char *, char *, size_t, off_t, struct fuse_file_info *);
 int write_cb(const char *, const char *, size_t, off_t, struct fuse_file_info *);

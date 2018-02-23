@@ -1,5 +1,7 @@
+#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <strings.h>
 #include <fuse.h>
@@ -30,7 +32,7 @@ struct fuse_operations callback_operations = {
     .chmod = chmod_cb,
     .chown = chown_cb,
     .truncate = truncate_cb,
-    .utime = utime_cb,
+    .utimens = utimens_cb,
     .open = open_cb,
     .read = read_cb,
     .write = write_cb,
@@ -57,10 +59,19 @@ static int xattrfs_parse_opt(void *data, const char *arg, int key,
         case FUSE_OPT_KEY_OPT:
             return 1;
         case FUSE_OPT_KEY_NONOPT:
-            if(source_dir == NULL) {
-                source_dir = strdup(arg);
-                return 0;
-            } else {
+            // 1st non-fuse arg is the source dir
+            if (source_dir[0] == '\0') {
+                // get the absolute path of the source dir
+                if (realpath(arg, source_dir) == NULL) {
+                    perror("mount failed");
+                    exit(1);
+                }
+                else {  // ok
+                    return 0;
+                }
+            }
+            else
+            {   // this is the mountpoint, nothing to do here
                 return 1;
             }
         case KEY_HELP:
@@ -83,6 +94,9 @@ static int xattrfs_parse_opt(void *data, const char *arg, int key,
 int main(int argc, char *argv[]) {
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
     int res;
+
+    // do not limit our permission bits
+    umask(0);
 
     res = fuse_opt_parse(&args, &source_dir, xattrfs_opts, xattrfs_parse_opt);
     if(res != 0) {

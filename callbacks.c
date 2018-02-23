@@ -5,13 +5,16 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/statvfs.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include "callbacks.h"
 #include "xattrdb.h"
 
 #define MAX_PATH 4096
 #define XATTRDB_FILE_NAME "/.xattrdb"
-char *source_dir = NULL;
+char source_dir_storage[MAX_PATH] = "";
+char *source_dir = source_dir_storage;
 
 static void destination_path(char* dpath, const char *path) {
     snprintf(dpath, MAX_PATH, "%s%s", source_dir, path);
@@ -74,11 +77,9 @@ int rmdir_cb(const char *path) {
 }
 
 int symlink_cb(const char *target, const char *linkpath) {
-    char dtarget[MAX_PATH];
-    destination_path(dtarget, target);
     char dlinkpath[MAX_PATH];
     destination_path(dlinkpath, linkpath);
-    const int res = symlink(dtarget, dlinkpath);
+    const int res = symlink(target, dlinkpath);
     return check_res(res);
 }
 
@@ -113,7 +114,7 @@ int chmod_cb(const char *path, mode_t mode) {
 int chown_cb(const char *path, uid_t owner, gid_t group) {
     char dpath[MAX_PATH];
     destination_path(dpath, path);
-    const int res = chown(dpath, owner, group);
+    const int res = lchown(dpath, owner, group);
     return check_res(res);
 }
 
@@ -124,10 +125,10 @@ int truncate_cb(const char *path, off_t size) {
     return check_res(res);
 }
 
-int utime_cb(const char *path, struct utimbuf *buf) {
+int utimens_cb(const char *path, const struct timespec tv[2]) {
     char dpath[MAX_PATH];
     destination_path(dpath, path);
-    const int res = utime(dpath, buf);
+    const int res = utimensat(0 /*ignored*/, dpath, tv, AT_SYMLINK_NOFOLLOW);
     return check_res(res);
 }
 
